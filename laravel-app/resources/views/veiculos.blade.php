@@ -156,8 +156,6 @@
         var modelosDisponiveis;
         console.log("teste");
 
-        window.addEventListener('load', carregarSelectsModeloMarca);
-
             var table = $('#veiculosTable').DataTable({
                 "pageLength": 20,
                 "ajax": {
@@ -314,6 +312,7 @@
         $('#veiculosTable tbody').on('click', 'button.btn-primary', function () {
             var data = table.row($(this).parents('tr')).data();
             abrirModalEdicao(data);
+            $('#editarModal').modal('show');
         });
 
         function abrirModalEdicao(data) {
@@ -325,6 +324,7 @@
                     url: '/modelos/listar',
                     type: 'GET',
                     success: function (response) {
+                        console.log(response);
                         modelosDisponiveis = response;
                         preencherModalEdicao(data);
                     },
@@ -341,15 +341,20 @@
 
         function preencherModalEdicao(data) {
             var selectModelo = $('#editModelo');
+
+
             $('#editarModal #editId').val(data.id);
             $('#editarModal #editPreco').val(data.preco);
             $('#editarModal #editImagem').val(data.imagem);
 
+            if (!modelosDisponiveis || modelosDisponiveis.length === 0) {
+                console.error('Modelos disponíveis não foram carregados corretamente.');
+                return;
+            }
             selectModelo.empty();
             modelosDisponiveis.forEach(function (modelo) {
                 selectModelo.append('<option value="' + modelo.id + '">' + modelo.nome + '</option>');
             });
-            selectModelo.val(data.modelo.id);
 
             $('#loader').addClass('d-none').removeClass('d-flex');
             $('#editarForm').removeClass('d-none');
