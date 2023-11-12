@@ -33,9 +33,9 @@ Route::get('/modelos', function () {
     return view('modelos');
 })->middleware(['auth', 'verified'])->name('modelos');
 
-Route::get('/veiculos', function () {
-    return view('veiculos');
-})->middleware(['auth', 'verified'])->name('veiculos');
+Route::get('/marcas', function () {
+    return view('marcas');
+})->middleware(['auth', 'verified'])->name('marcas');
 
 Route::get('/veiculos/listar', [VeiculoController::class, 'listar'])->name('veiculos.listar');
 Route::post('/veiculos/create', [VeiculoController::class, 'create'])->name('veiculo.create');

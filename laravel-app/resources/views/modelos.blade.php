@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Veiculos') }}
+            {{ __('Modelos') }}
         </h2>
         
     </x-slot>
@@ -62,45 +62,6 @@
                             </div>
                         </div>
 
-                        <div class="modal fade" id="editarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Editar Registro</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div id="loader" class="d-flex justify-content-center align-items-center">
-                                            <img src="https://i.gifer.com/ZKZg.gif" width="100px" height="100px">
-                                        </div>
-                                        <form id="editarForm" class="d-none">
-                                            <div class="form-group">
-                                                <label for="editId">ID:</label>
-                                                <input type="text" class="form-control" id="editId" readonly>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="editModelo">Modelo:</label>
-                                                <span class="d-none" id="modeloId"></span>
-                                                <select class="form-control" id="editModelo" required></select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="editPreco">Preço:</label>
-                                                <input type="text" class="form-control" id="editPreco" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="editPreco">Imagem:</label>
-                                                <input type="text" class="form-control" id="editImagem" required>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn  btn-sm mx-2 bg-primarybtn-salvar">Salvar</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="modal fade" id="confirmacaoExclusaoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -168,16 +129,14 @@
 
 
                         <button type="button" class="btn btn-success ml-auto mt-3 active" data-toggle="modal" data-target="#criarModal">
-                            Adicionar Veículo
+                            Adicionar Modelo
                         </button>
                         <table id="veiculosTable" class="table table-striped table-bordered" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Id</th>
-                                    <th>Marca</th>
-                                    <th>Modelo</th>
-                                    <th>Preco</th>
-                                    <th>Imagem</th>
+                                    <th>Nome</th>
+                                    <th>Marca Id</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -193,37 +152,21 @@
 <script type="text/javascript">   
     $(document).ready(function () {
         var modelosDisponiveis;
-        console.log("teste");
-
-        window.addEventListener('load', carregarSelectsModeloMarca);
-
             var table = $('#veiculosTable').DataTable({
                 "pageLength": 20,
                 "ajax": {
-                    "url": "/veiculos/listar",
+                    "url": "/modelos/listar",
                     "type": "GET",
                     "dataType": "json",
                     "dataSrc": function (data) {
-                        return data.data;
+                        return data;
                     }
                 },
                 "columns": [
                     { "data": "id" },
-                    { "data": "marca.nome"},
-                    { "data": "modelo.nome" },
-                    { "data": "preco"},
-                    { "data": "imagem",
-                        "render": function (data, type, row) {
-                            if (type === 'display') {
-                                var buttonsHtml = `
-                                    <a href="#" class="imagem-link" data-toggle="modal" data-target="#imagemModal" data-imagem="${data}">
-                                        <img src="${data}" alt="Imagem" width="65" height="65">
-                                    </a>`;
-                                return buttonsHtml;
-                            }
-                            return data;
-                        }
-                    },
+                    { "data": "nome"},
+                    { "data": "marca_id" },
+                    
                     {
                         "data": null,
                         "render": function (data, type, row) {
@@ -329,7 +272,7 @@
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: '/veiculos/create',
+                url: '/modelos/create',
                 type: 'POST',
                 data: dadosCriacao,
                 success: function (response) {
@@ -353,6 +296,7 @@
         $('#veiculosTable tbody').on('click', 'button.btn-primary', function () {
             var data = table.row($(this).parents('tr')).data();
             abrirModalEdicao(data);
+            $('#editarModal').modal('show');
         });
 
         function abrirModalEdicao(data) {
@@ -364,6 +308,7 @@
                     url: '/modelos/listar',
                     type: 'GET',
                     success: function (response) {
+                        console.log(response);
                         modelosDisponiveis = response;
                         preencherModalEdicao(data);
                     },
@@ -388,7 +333,6 @@
             modelosDisponiveis.forEach(function (modelo) {
                 selectModelo.append('<option value="' + modelo.id + '">' + modelo.nome + '</option>');
             });
-            selectModelo.val(data.modelo.id);
 
             $('#loader').addClass('d-none').removeClass('d-flex');
             $('#editarForm').removeClass('d-none');
@@ -435,9 +379,9 @@
 
 
     $('#editarModal').on('click', 'button.btn-salvar', function () {
-    salvarEdicao();
+        salvarEdicao();
     });
-
+    
     function salvarEdicao() {
         var id = $('#editId').val();
         var modeloId = $('#editModelo').val(); 
