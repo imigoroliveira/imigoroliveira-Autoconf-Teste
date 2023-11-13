@@ -67,7 +67,7 @@
 </head>
 <body>
     <video autoplay muted loop>
-        <source src="{{ asset('videos/videoAutoconf.mp4') }}" type="video/mp4">
+        <source src="{{ asset('assets/videos/videoAutoconf.mp4') }}" type="video/mp4">
         Seu navegador não suporta a tag de vídeo.
     </video>
     
