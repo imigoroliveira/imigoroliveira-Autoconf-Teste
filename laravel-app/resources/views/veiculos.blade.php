@@ -118,7 +118,7 @@
                                         </form>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary btn-salvar">Salvar</button>
+                                        <button type="button" class="btn btn-primary btn-salvar active">Salvar</button>
                                     </div>
                                 </div>
                             </div>
@@ -154,7 +154,6 @@
 <script type="text/javascript">   
     $(document).ready(function () {
         var modelosDisponiveis;
-        console.log("teste");
 
             var table = $('#veiculosTable').DataTable({
                 "pageLength": 20,
@@ -216,6 +215,7 @@
             $('#modeloIdModelo').val('');
             $('#preco').val('');
             $('#imagem').val('');
+            carregarSelectsModeloMarca();
 
         }
 
@@ -228,13 +228,15 @@
                 type: 'GET',
                 success: function (modelos) {
                     $('#modeloIdModelo').empty();
-                    modelosDisponiveis = modelos;
+                    modelosDisponiveis = modelos.data;
+                    console.log(modelosDisponiveis);
 
-                    modelos.forEach(function (modelo) {
+                    modelosDisponiveis.forEach(function (modelo) {
+
                         $('#modeloIdModelo').append('<option value="' + modelo.id + '">' + modelo.nome + '</option>');
                     });
 
-                    var primeiroModeloId = modelos[0].id;
+                    var primeiroModeloId = modelosDisponiveis[0].id;
                     $('#modeloIdModelo').val(primeiroModeloId);
                     buscaMarcaPorModelo(primeiroModeloId);
                 },
@@ -310,59 +312,44 @@
         });
 
         $('#veiculosTable tbody').on('click', 'button.btn-primary', function () {
-        var data = table.row($(this).parents('tr')).data();
-        abrirModalEdicao(data);
-        $('#editarModal').modal('show');
-    });
+            var data = table.row($(this).parents('tr')).data();
+            abrirModalEdicao(data);
+        });
 
         function abrirModalEdicao(data) {
-            if (!modelosDisponiveis) {
-                $.ajax({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    url: '/modelos/listar',
-                    type: 'GET',
-                    success: function (response) {
-                        console.log(response);
-                        modelosDisponiveis = response;
-                        preencherModalEdicao(data);
-                    },
-                    error: function (error) {
-                        console.error('Erro ao buscar modelos:', error);
-                    },
-                    complete: function () {
-                    }
-                });
-            } else {
-                preencherModalEdicao(data);
-            }
-        }
-
-        function preencherModalEdicao(data) {
-            var selectModelo = $('#editModelo');
-
+            $('#editarModal').modal('show');
 
             $('#editarModal #editId').val(data.id);
             $('#editarModal #editPreco').val(data.preco);
             $('#editarModal #editImagem').val(data.imagem);
+           
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: '/modelos/listar',
+                type: 'GET',
+                success: function (response) {
+                    modelosDisponiveis = response.data;
+                    $('#loader').addClass('d-none').removeClass('d-flex');
+                    $('#editarForm').removeClass('d-none');
 
-            if (!modelosDisponiveis || modelosDisponiveis.length === 0) {
-                console.error('Modelos disponíveis não foram carregados corretamente.');
-                return;
-            }
-            selectModelo.empty();
-            modelosDisponiveis.forEach(function (modelo) {
-                selectModelo.append('<option value="' + modelo.id + '">' + modelo.nome + '</option>');
+                    var selectModelo = $('#editModelo');
+                    selectModelo.empty();
+                    modelosDisponiveis.forEach(function (modelo) {
+                        selectModelo.append('<option value="' + modelo.id + '">' + modelo.nome + '</option>');
+                        selectModelo.val(data.modelo.id);
+
+                    });
+                },
+                error: function (error) {
+                    console.error('Erro ao buscar modelos:', error);
+                }
             });
-
-            $('#loader').addClass('d-none').removeClass('d-flex');
-            $('#editarForm').removeClass('d-none');
+            
+         
+          
         }
-
-        $('#editarModal').on('click', 'button.btn-salvar', function () {
-            console.log("Requisição para atualizar os dados");
-        });
 
 
     $('#veiculosTable tbody').on('click', 'button.btn-danger', function () {
