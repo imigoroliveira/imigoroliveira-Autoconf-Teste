@@ -12,7 +12,7 @@
                 <div class="row">
                     <div class="col-8  m-5">
                         <div id="successAlert" class="alert alert-success" role="alert" style="display: none;">
-                            Veículo removido com sucesso!
+                            Marca removida com sucesso!
                         </div>
                         <div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
