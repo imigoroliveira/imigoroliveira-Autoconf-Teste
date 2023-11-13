@@ -45,7 +45,7 @@ Route::delete('/veiculos/{id}/delete', [VeiculoController::class, 'delete'])->na
 
 
 Route::get('/modelos/listar', [ModeloController::class, 'listar'])->name('modelos.listar');
-Route::get('/modelos/create', [ModeloController::class, 'create'])->name('veiculo.create');
+Route::post('/modelos/create', [ModeloController::class, 'create'])->name('veiculo.create');
 Route::put('/modelos/{id}/update', [ModeloController::class, 'update'])->name('veiculo.update');
 Route::delete('/modelos/{id}/delete', [ModeloController::class, 'delete'])->name('veiculo.delete');
 Route::get('/modelos/{id}', [ModeloController::class, 'getModelById'])->name('modelos.getModelById');
@@ -56,7 +56,7 @@ Route::get('/modelos/{id}', [ModeloController::class, 'getModelById'])->name('mo
 
 
 Route::get('/marcas/listar', [MarcaController::class, 'listar'])->name('marcas.listar');
-Route::get('/marcas/create', [MarcaController::class, 'create'])->name('marcas.create');
+Route::post('/marcas/create', [MarcaController::class, 'create'])->name('marcas.create');
 Route::get('/marcas/get/{id}', [MarcaController::class, 'getMarcaByModelo'])->name('marcas.getMarcaByModelo');
 Route::put('/marcas/{id}/update', [MarcaController::class, 'update'])->name('marcas.update');
 Route::delete('/marcas/{id}/delete', [MarcaController::class, 'delete'])->name('marcas.delete');

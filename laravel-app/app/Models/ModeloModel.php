@@ -9,7 +9,7 @@ class ModeloModel extends Model
     protected $table = 'modelos'; 
 
     protected $fillable = [
-        'nome', 
+        'nome', 'marca_id', 'created_at', 'updated_at'
     ];
 
 }

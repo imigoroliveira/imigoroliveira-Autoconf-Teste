@@ -28,7 +28,7 @@
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Criar Novo Veículo</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Criar Novo Modelo</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -36,22 +36,13 @@
                                     <div class="modal-body">
                                         <form id="criarForm">
                                             <div class="form-group">
-                                                <label for="modeloId">Modelo:</label>
-                                                <select class="form-control" id="modeloIdModelo" required>
-                                                </select>
+                                                <label for="preco">Nome:</label>
+                                                <input type="text" class="form-control" id="nome" required>
                                             </div>
                                             <div class="form-group">
                                                 <label for="modeloId">Marca:</label>
                                                 <select required class="form-control" id="modeloIdMarca" required>
                                             </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="preco">Preço:</label>
-                                                <input type="text" class="form-control" id="preco" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="imagem">Imagem:</label>
-                                                <input type="text" class="form-control" id="imagem" required>
                                             </div>
                                         </form>
                                     </div>
@@ -88,7 +79,7 @@
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Editar Registro</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Editar Modelo</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -99,21 +90,15 @@
                                         </div>
                                         <form id="editarForm" class="d-none">
                                             <div class="form-group">
-                                                <label for="editId">ID:</label>
-                                                <input type="text" class="form-control" id="editId" readonly>
+                                                <label for="editPreco">Nome:</label>
+                                                <input type="text" class="form-control" id="nomeId" required>
                                             </div>
                                             <div class="form-group">
-                                                <label for="editModelo">Modelo:</label>
-                                                <span class="d-none" id="modeloId"></span>
-                                                <select class="form-control" id="editModelo" required></select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="editPreco">Preço:</label>
-                                                <input type="text" class="form-control" id="editPreco" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="editPreco">Imagem:</label>
-                                                <input type="text" class="form-control" id="editImagem" required>
+                                                <label for="editMarca">Marca:</label>
+                                                <span class="d-none" id="marcaId"></span>
+                                                <select class="form-control" id="editMarca" required>
+                                                    <option id="firstOption"></option>
+                                                </select>
                                             </div>
                                         </form>
                                     </div>
@@ -131,12 +116,12 @@
                         <button type="button" class="btn btn-success ml-auto mt-3 active" data-toggle="modal" data-target="#criarModal">
                             Adicionar Modelo
                         </button>
-                        <table id="veiculosTable" class="table table-striped table-bordered" style="width:100%">
+                        <table id="modelosTable" class="table table-striped table-bordered" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Id</th>
                                     <th>Nome</th>
-                                    <th>Marca Id</th>
+                                    <th>Marca</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -151,21 +136,24 @@
     </div>
 <script type="text/javascript">   
     $(document).ready(function () {
+        var marcasDisponiveis;
+        var marca;
         var modelosDisponiveis;
-            var table = $('#veiculosTable').DataTable({
+
+        var table = $('#modelosTable').DataTable({
                 "pageLength": 20,
                 "ajax": {
                     "url": "/modelos/listar",
                     "type": "GET",
                     "dataType": "json",
                     "dataSrc": function (data) {
-                        return data;
+                        return data.data;
                     }
                 },
                 "columns": [
                     { "data": "id" },
                     { "data": "nome"},
-                    { "data": "marca_id" },
+                    { "data": "marca.nome" },
                     
                     {
                         "data": null,
@@ -197,75 +185,38 @@
 
         function limparFormularioCriacao() {
             $('#modeloIdMarca').val('');
-            $('#modeloIdModelo').val('');
-            $('#preco').val('');
-            $('#imagem').val('');
-
-        }
-
-        function carregarSelectsModeloMarca() {
+            $('#nome').val('');
             $.ajax({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                url: '/modelos/listar',
+                url: '/marcas/listar',
                 type: 'GET',
-                success: function (modelos) {
-                    $('#modeloIdModelo').empty();
-                    modelosDisponiveis = modelos;
-
-                    modelos.forEach(function (modelo) {
-                        $('#modeloIdModelo').append('<option value="' + modelo.id + '">' + modelo.nome + '</option>');
+                success: function (marcas) {
+                    $('#modeloIdMarca').empty();
+                    marcasDisponiveis = marcas.marcas;
+                    marcasDisponiveis.forEach(function (marca) {
+                        $('#modeloIdMarca').append('<option value="' + marca.id + '">' + marca.nome + '</option>');
                     });
 
-                    var primeiroModeloId = modelos[0].id;
-                    $('#modeloIdModelo').val(primeiroModeloId);
-                    buscaMarcaPorModelo(primeiroModeloId);
+                    var primeiraMarca = marcasDisponiveis[0].id;
+                    $('#modeloIdMarca').val(primeiraMarca);
                 },
                 error: function (error) {
-                    console.error('Erro ao obter modelos disponíveis:', error);
+                    console.error('Erro ao obter marcas disponíveis:', error);
                 }
             });
-            $('#modeloIdModelo').trigger('change');
+
         }
 
 
-
-
-
-
-
-        $('#modeloIdModelo').change(function () {
-            var modeloSelecionadoId = $(this).val();
-            buscaMarcaPorModelo(modeloSelecionadoId);
-        });
-
-        function buscaMarcaPorModelo(id){
-        $.ajax({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            url: '/marcas/get/'+id,
-            type: 'GET',
-            success: function (modelo) {
-                $('#modeloIdMarca').empty();
-                $('#modeloIdMarca').append('<option value="' + modelo.id + '">' + modelo.nome + '</option>');
-            },
-            error: function (error) {
-                console.error('Erro ao obter modelos disponíveis:', error);
-            }
-        });
-    }
-
         function salvarCriacao() {
-            var modeloId = $('#modeloIdModelo').val();
-            var preco = $('#preco').val();
-            var imagem = $('#imagem').val();
+            var nome = $('#nome').val();
+            var marca_id = $('#modeloIdMarca').val();
 
             var dadosCriacao = {
-                modelo_id: modeloId,
-                preco: preco,
-                imagem: imagem
+                nome: nome,
+                marca_id: marca_id,
             };
 
             $.ajax({
@@ -276,74 +227,74 @@
                 type: 'POST',
                 data: dadosCriacao,
                 success: function (response) {
-                    alert("Veículo criado com sucesso!");
+                    alert("Modelo criado com sucesso!");
                     $('#criarModal').modal('hide');
-                    $('#veiculosTable').DataTable().ajax.reload();
+                    $('#modelosTable').DataTable().ajax.reload();
                 },
                 error: function (error) {
-                    console.error('Erro ao criar veículo:', error);
+                    console.error('Erro ao criar modelo:', error);
                 }
             });
         }
 
-        $('#veiculosTable tbody').on('click', 'a.imagem-link', function (e) {
+        $('#modelosTable tbody').on('click', 'a.imagem-link', function (e) {
             e.preventDefault();
             var imageUrl = $(this).data('imagem');
             $('#imagemModal .modal-body').html('<img src="' + imageUrl + '" alt="Imagem Maior" class="img-fluid">');
             $('#imagemModal').modal('show');
         });
 
-        $('#veiculosTable tbody').on('click', 'button.btn-primary', function () {
+        $('#modelosTable tbody').on('click', 'button.btn-primary', function () {
             var data = table.row($(this).parents('tr')).data();
             abrirModalEdicao(data);
             $('#editarModal').modal('show');
         });
 
         function abrirModalEdicao(data) {
-            if (!modelosDisponiveis) {
-                $.ajax({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    url: '/modelos/listar',
-                    type: 'GET',
-                    success: function (response) {
-                        console.log(response);
-                        modelosDisponiveis = response;
-                        preencherModalEdicao(data);
-                    },
-                    error: function (error) {
-                        console.error('Erro ao buscar modelos:', error);
-                    },
-                    complete: function () {
-                    }
-                });
-            } else {
-                preencherModalEdicao(data);
-            }
-        }
+            $('#editarModal #editMarca').empty();
+            $('#editarModal #marcaId').val(data.marca.id);
+            $('#editarModal #nomeId').val(data.nome);
+            $('#editarModal #marcaId').val(data.id); 
 
-        function preencherModalEdicao(data) {
-            var selectModelo = $('#editModelo');
-            $('#editarModal #editId').val(data.id);
-            $('#editarModal #editPreco').val(data.preco);
-            $('#editarModal #editImagem').val(data.imagem);
-
-            selectModelo.empty();
-            modelosDisponiveis.forEach(function (modelo) {
-                selectModelo.append('<option value="' + modelo.id + '">' + modelo.nome + '</option>');
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: '/marcas/listar',
+                type: 'GET',
+                success: function (response) {
+                    marcasDisponiveis = response.marcas;
+                    console.log(marcasDisponiveis);
+                    
+                    var selectMarca = $('#editMarca');
+                    selectMarca.empty(); 
+                        $('#editarModal #firstOption').val(data.marca.id);
+                        $('#editarModal #firstOption').text(data.marca.nome);
+                    marcasDisponiveis.forEach(function (marca) {
+                        if (marca.id != data.marca.id) {
+                            $('#editMarca').append('<option value="' + marca.id + '">' + marca.nome + '</option>');
+                        }
+                    });
+                },
+                error: function (error) {
+                    console.error('Erro ao buscar modelos:', error);
+                },
+                complete: function () {
+                }
             });
 
             $('#loader').addClass('d-none').removeClass('d-flex');
             $('#editarForm').removeClass('d-none');
         }
 
+    
+
         $('#editarModal').on('click', 'button.btn-salvar', function () {
             console.log("Requisição para atualizar os dados");
         });
 
 
-    $('#veiculosTable tbody').on('click', 'button.btn-danger', function () {
+    $('#modelosTable tbody').on('click', 'button.btn-danger', function () {
         var id = table.row($(this).parents('tr')).data().id;
 
         $('#confirmacaoExclusaoModal').modal('show');
@@ -357,18 +308,18 @@
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            url: '/veiculos/' + id + '/delete',
+            url: '/modelos/' + id + '/delete',
             type: 'DELETE',
             success: function (data) {
                 if (data.success) {
-                    $('#veiculosTable').DataTable().ajax.reload();
+                    $('#modelosTable').DataTable().ajax.reload();
                     var successAlert = document.getElementById('successAlert');
                     successAlert.style.display = 'block';
                     setTimeout(function () {
                         successAlert.style.display = 'none';
                     }, 3000);
                 } else {
-                    console.error('Erro ao excluir veiculo:', data.message);
+                    console.error('Erro ao excluir modelo:', data.message);
                 }
             }
         });
@@ -383,34 +334,34 @@
     });
     
     function salvarEdicao() {
-        var id = $('#editId').val();
-        var modeloId = $('#editModelo').val(); 
-        var preco = $('#editPreco').val();
-        var imagem = $('#editImagem').val();
 
+        var nome = $('#nomeId').val(); 
+        var marca_id = $('#editMarca').val();
+        var modeloId = $('#marcaId').val(); 
+    
+        console.log(nome,marca_id,modeloId);
         var dadosAtualizados = {
-            id: id,
-            modelo_id: modeloId,
-            preco: preco,
-            imagem: imagem
+            nome: nome,
+            marca_id: marca_id,
         };
 
 
         $('#loader').addClass('d-flex').removeClass('d-none');
         $('#editarForm').addClass('d-none');
 
+        console.log("chgegou");
 
         $.ajax({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            url: '/veiculos/'+ id + "/update",
+            url: '/modelos/'+ modeloId + "/update",
             type: 'PUT', 
             data: dadosAtualizados,
             success: function (response) {
                 alert("Veiculo atualizado com sucesso!");
                 $('#editarModal').modal('hide');
-                $('#veiculosTable').DataTable().ajax.reload();
+                $('#modelosTable').DataTable().ajax.reload();
 
             },
             error: function (error) {

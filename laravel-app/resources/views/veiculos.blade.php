@@ -310,10 +310,10 @@
         });
 
         $('#veiculosTable tbody').on('click', 'button.btn-primary', function () {
-            var data = table.row($(this).parents('tr')).data();
-            abrirModalEdicao(data);
-            $('#editarModal').modal('show');
-        });
+        var data = table.row($(this).parents('tr')).data();
+        abrirModalEdicao(data);
+        $('#editarModal').modal('show');
+    });
 
         function abrirModalEdicao(data) {
             if (!modelosDisponiveis) {
